@@ -26,20 +26,24 @@ jobs:
       platform: darwin
       inputs:
         - name: etcher-git-repository
-      caches:
-        - path: etcher-git-repository/node_modules
       outputs:
-        - name: etcher-git-repository/node_modules
+        - name: node_modules
       run:
-        path: make
+        path: sh
         dir: etcher-git-repository
-        args: [ electron-develop ]
+        args:
+          - -exc
+          - |
+            make electron-develop
+            cp -rf node_modules ..
 
   - task: lint
     config:
       platform: darwin
       inputs:
         - name: etcher-git-repository
+        - name: node_modules
+          path: etcher-git-repository/node_modules
       run:
         path: make
         dir: etcher-git-repository
