@@ -1,0 +1,64 @@
+resources:
+- name: etcher-git-repository
+  type: git
+  source:
+    uri: https://github.com/resin-io/etcher.git
+    branch: concourse-test
+    disable_ci_skip: true
+
+# resources:
+# - name: every-1m
+  # type: time
+  # source: 
+    # interval: 1m
+
+jobs:
+- name: etcher-tests
+
+  # Make the job results accessible to 
+  # un-authenticated users
+  public: true
+
+  plan:
+  # - get: every-1m
+  - get: etcher-git-repository
+
+    # Trigger this job if the resource has a new 
+    # version. If this is false, the job can only 
+    # be started from the web UI.
+    trigger: true
+
+  - task: dependencies
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: node
+          tag: boron-wheezy
+      inputs:
+        - name: etcher-git-repository
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          echo "deb http://http.debian.net/debian wheezy-backports main" >> /etc/apt/sources.list
+          apt-get update
+          apt-get install -y jq curl libudev-dev python python-pip python-dev
+          pip install -r requirements.txt
+          cd etcher-git-repository
+          make electron-develop
+
+  - task: lint
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: ubuntu
+      run:
+        path: pwd
+        args: []
+      inputs:
+        - name: etcher-git-repository
