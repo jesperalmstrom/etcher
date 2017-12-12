@@ -23,12 +23,7 @@ jobs:
 
   - task: dependencies
     config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: node
-          tag: boron-wheezy
+      platform: darwin
       inputs:
         - name: etcher-git-repository
       run:
@@ -36,27 +31,47 @@ jobs:
         args:
         - -exc
         - |
-          echo "deb http://http.debian.net/debian wheezy-backports main" >> /etc/apt/sources.list
-          apt-get update
-          apt-get install -y jq curl libudev-dev python python-dev python-setuptools
-          curl "https://pypi.python.org/packages/11/b6/abcb525026a4be042b486df43905d6893fb04f05aac21c32c638e939e447/pip-9.0.1.tar.gz" > pip-9.0.1.tar.gz
-          tar xvfz pip-9.0.1.tar.gz
-          cd pip-9.0.1
-          python setup.py install
-          cd ..
-          pip install -r etcher-git-repository/requirements.txt
           cd etcher-git-repository
           make electron-develop
 
   - task: lint
     config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: ubuntu
-      run:
-        path: pwd
-        args: []
+      platform: darwin
       inputs:
         - name: etcher-git-repository
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          ls
+          cd etcher-git-repository
+          make lint
+
+  - task: test
+    config:
+      platform: darwin
+      inputs:
+        - name: etcher-git-repository
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          ls
+          cd etcher-git-repository
+          make test
+
+  - task: sanity-checks
+    config:
+      platform: darwin
+      inputs:
+        - name: etcher-git-repository
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          ls
+          cd etcher-git-repository
+          make sanity-checks
