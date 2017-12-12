@@ -1,5 +1,5 @@
 resources:
-- name: etcher-git-repository
+- name: etcher
   type: git
   source:
     uri: https://github.com/resin-io/etcher.git
@@ -7,14 +7,14 @@ resources:
     disable_ci_skip: true
 
 jobs:
-- name: etcher-tests
+- name: tests-darwin
 
   # Make the job results accessible to
   # un-authenticated users
   public: true
 
   plan:
-  - get: etcher-git-repository
+  - get: etcher
 
     # Trigger this job if the resource has a new
     # version. If this is false, the job can only
@@ -25,12 +25,12 @@ jobs:
     config:
       platform: darwin
       inputs:
-        - name: etcher-git-repository
+        - name: etcher
       outputs:
         - name: node_modules
       run:
         path: sh
-        dir: etcher-git-repository
+        dir: etcher
         args:
           - -exc
           - |
@@ -41,29 +41,29 @@ jobs:
     config:
       platform: darwin
       inputs:
-        - name: etcher-git-repository
+        - name: etcher
         - name: node_modules
       run:
         path: ci/run-make.sh
-        dir: etcher-git-repository
+        dir: etcher
         args: [ ../node_modules, lint ]
 
   - task: test
     config:
       platform: darwin
       inputs:
-        - name: etcher-git-repository
+        - name: etcher
       run:
         path: make
-        dir: etcher-git-repository
+        dir: etcher
         args: [ test ]
 
   - task: sanity-checks
     config:
       platform: darwin
       inputs:
-        - name: etcher-git-repository
+        - name: etcher
       run:
         path: make
-        dir: etcher-git-repository
+        dir: etcher
         args: [ sanity-checks ]
