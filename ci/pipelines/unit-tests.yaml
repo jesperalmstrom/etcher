@@ -36,6 +36,8 @@ jobs:
           - |
             make electron-develop
             cp -rf node_modules ..
+            ls ..
+            ls ../node_modules
 
   - task: lint
     config:
