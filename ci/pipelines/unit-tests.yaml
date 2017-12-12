@@ -35,7 +35,8 @@ jobs:
           - -exc
           - |
             make electron-develop
-            cp -rf node_modules ..
+            ls ..
+            cp -rf node_modules/* ../node_modules
             ls ..
             ls ../node_modules
 

@@ -9,6 +9,7 @@ shift
 pwd
 ls
 ls ..
+ls ../..
 
 cp -rf "$NODE_MODULES" .
 make $*
