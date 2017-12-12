@@ -43,11 +43,10 @@ jobs:
       inputs:
         - name: etcher-git-repository
         - name: node_modules
-          path: etcher-git-repository/node_modules
       run:
-        path: make
+        path: ci/run-make.sh
         dir: etcher-git-repository
-        args: [ lint ]
+        args: [ ../node_modules, lint ]
 
   - task: test
     config:
