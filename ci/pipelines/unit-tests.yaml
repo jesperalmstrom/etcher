@@ -1,5 +1,5 @@
 resources:
-- name: etcher
+- name: etcher-git
   type: git
   source:
     uri: https://github.com/resin-io/etcher.git
@@ -14,7 +14,7 @@ jobs:
   public: true
 
   plan:
-  - get: etcher
+  - get: etcher-git
 
     # Trigger this job if the resource has a new
     # version. If this is false, the job can only
@@ -25,48 +25,59 @@ jobs:
     config:
       platform: darwin
       inputs:
-        - name: etcher
+        - name: etcher-git
       outputs:
-        - name: node_modules
+        - name: etcher-electron
       run:
-        path: sh
-        dir: etcher
+        path: /bin/bash
         args:
           - -exc
           - |
-            make electron-develop
-            ls ..
-            cp -rf node_modules/* ../node_modules
-            ls ..
-            ls ../node_modules
+            cp -a etcher-git/. etcher-electron
+            make -C etcher-electron electron-develop
+            cd etcher-electron/node_modules
+            tar czf bin.tar.gz .bin
+
+  # TODO: Use an aggregate to parallelize these
 
   - task: lint
     config:
       platform: darwin
       inputs:
-        - name: etcher
-        - name: node_modules
+        - name: etcher-electron
       run:
-        path: ci/run-make.sh
-        dir: etcher
-        args: [ ../node_modules, lint ]
+        path: /bin/bash
+        dir: etcher-electron
+        args:
+          - -exc
+          - |
+            tar fx ./node_modules/bin.tar.gz -C ./node_modules
+            make lint
 
   - task: test
     config:
       platform: darwin
       inputs:
-        - name: etcher
+        - name: etcher-electron
       run:
-        path: make
-        dir: etcher
-        args: [ test ]
+        path: /bin/bash
+        dir: etcher-electron
+        args:
+          - -exc
+          - |
+            tar fx ./node_modules/bin.tar.gz -C ./node_modules
+            make test
 
   - task: sanity-checks
     config:
       platform: darwin
       inputs:
-        - name: etcher
+        - name: etcher-electron
       run:
-        path: make
-        dir: etcher
-        args: [ sanity-checks ]
+        path: /bin/bash
+        dir: etcher-electron
+        args:
+          - -exc
+          - |
+            tar fx ./node_modules/bin.tar.gz -C ./node_modules
+            make sanity-checks
