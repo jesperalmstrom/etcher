@@ -34,25 +34,10 @@ jobs:
           - -exc
           - |
             cp -a etcher-git/. etcher-electron
+            export npm_config_unsafe_perm=true
             make -C etcher-electron electron-develop
             cd etcher-electron/node_modules
             tar czf bin.tar.gz .bin
-
-  # TODO: Use an aggregate to parallelize these
-
-  - task: lint
-    config:
-      platform: darwin
-      inputs:
-        - name: etcher-electron
-      run:
-        path: /bin/bash
-        dir: etcher-electron
-        args:
-          - -exc
-          - |
-            tar fx ./node_modules/bin.tar.gz -C ./node_modules
-            make lint
 
   - task: test
     config:
@@ -66,18 +51,6 @@ jobs:
           - -exc
           - |
             tar fx ./node_modules/bin.tar.gz -C ./node_modules
-            make test
-
-  - task: sanity-checks
-    config:
-      platform: darwin
-      inputs:
-        - name: etcher-electron
-      run:
-        path: /bin/bash
-        dir: etcher-electron
-        args:
-          - -exc
-          - |
-            tar fx ./node_modules/bin.tar.gz -C ./node_modules
-            make sanity-checks
+            rm ./node_modules/bin.tar.gz
+            export npm_config_unsafe_perm=true
+            make lint test sanity-checks

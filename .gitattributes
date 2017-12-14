@@ -22,6 +22,7 @@ Makefile text
 *.bat text
 *.svg text
 *.yml text
+*.yaml text
 *.patch text
 *.txt text
 
