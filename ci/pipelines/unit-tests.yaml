@@ -27,30 +27,29 @@ jobs:
       inputs:
         - name: etcher-git
       outputs:
-        - name: etcher-electron
+        - name: etcher-ready
       run:
         path: /bin/bash
         args:
           - -exc
           - |
-            cp -a etcher-git/. etcher-electron
-            export npm_config_unsafe_perm=true
-            make -C etcher-electron electron-develop
-            cd etcher-electron/node_modules
-            tar czf bin.tar.gz .bin
+            cp -a etcher-git/. etcher-ready
+            ( cd etcher-ready && ./ci/install.sh )
+            tar czf etcher-ready/node_modules/bin.tar.gz etcher-ready/node_modules/.bin
 
   - task: test
     config:
       platform: darwin
       inputs:
-        - name: etcher-electron
+        - name: etcher-ready
+      params:
+        npm_config_unsafe_perm: true
       run:
         path: /bin/bash
-        dir: etcher-electron
+        dir: etcher-ready
         args:
           - -exc
           - |
-            tar fx ./node_modules/bin.tar.gz -C ./node_modules
+            tar fx ./node_modules/bin.tar.gz --strip-components 1
             rm ./node_modules/bin.tar.gz
-            export npm_config_unsafe_perm=true
-            make lint test sanity-checks
+            ./ci/test.sh
