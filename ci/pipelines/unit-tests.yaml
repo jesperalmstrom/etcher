@@ -53,3 +53,18 @@ jobs:
             tar fx ./node_modules/bin.tar.gz --strip-components 1
             rm ./node_modules/bin.tar.gz
             ./ci/test.sh
+
+  - task: build-installers
+    config:
+      platform: darwin
+      inputs:
+        - name: etcher-ready
+      run:
+        path: /bin/bash
+        dir: etcher-ready
+        args:
+          - -exc
+          - |
+            tar fx ./node_modules/bin.tar.gz --strip-components 1
+            rm ./node_modules/bin.tar.gz
+            ./ci/build-installers.sh
